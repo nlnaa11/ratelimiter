@@ -2,6 +2,8 @@ package config
 
 import "time"
 
+var DefaultConfig = MustConfig()
+
 var (
 	defaultRefreshInterval = time.Duration(time.Second / 100)
 	defaultMaxSpike        = 1

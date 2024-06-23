@@ -18,22 +18,13 @@ type rateLimiter struct {
 }
 
 func NewRateLimiter(oo ...Opt) (*rateLimiter, error) {
-	defaultCfg, err := config.NewConfig()
-	if err != nil {
-		return nil, err
-	}
-	defaultCls, err := closer.NewCloser()
-	if err != nil {
-		return nil, err
-	}
-
 	rl := &rateLimiter{
-		config: defaultCfg,
-		closer: defaultCls,
+		config: config.DefaultConfig,
+		closer: closer.DefaultCloser,
 	}
 
 	for _, o := range oo {
-		if err = o(rl); err != nil {
+		if err := o(rl); err != nil {
 			return nil, err
 		}
 	}
@@ -45,7 +36,7 @@ func NewRateLimiter(oo ...Opt) (*rateLimiter, error) {
 
 	rl.tokensCh = tokensCh
 
-	go rl.startRefreshTokens()
+	go rl.runRefreshTokens()
 
 	return rl, nil
 }
@@ -59,7 +50,7 @@ func MustRateLimiter(oo ...Opt) *rateLimiter {
 	return rl
 }
 
-func (rl *rateLimiter) startRefreshTokens() {
+func (rl *rateLimiter) runRefreshTokens() {
 	ticker := time.NewTicker(rl.config.RefreshInterval())
 	defer ticker.Stop()
 
